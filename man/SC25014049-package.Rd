@@ -16,14 +16,7 @@
 SC25014049
 Maintainer: Fenghao Lu <lfh3485188464@163.com>
 }
-\references{
-  This optional section can contain literature or other references for
-  background information.
-}
 \keyword{ package }
-\seealso{
-  Optional links to other man pages
-}
 \examples{
   \dontrun{
      temp <- seq(30, 800, length.out = 100)

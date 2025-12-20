@@ -9,7 +9,7 @@ tga_analyze(temperature, mass, n_components = 2)
 \arguments{
 \item{temperature}{Temperature vector(degree)}
 
-\item{mass}{mass(%)}
+\item{mass}{mass}
 
 \item{n_components}{Expected number of components(1-4)}
 }

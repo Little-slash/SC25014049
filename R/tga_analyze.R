@@ -3,7 +3,7 @@
 #' @description Analyze thermogravimetric analysis (TGA) data, decompose multi-component systems, and calculate thermal stability parameters.
 #'
 #' @param temperature Temperature vector(degree)
-#' @param mass mass(%)
+#' @param mass mass
 #' @param n_components Expected number of components(1-4)
 #' 
 #' @return A list containing analysis results with the following components

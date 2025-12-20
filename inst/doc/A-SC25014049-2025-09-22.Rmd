@@ -4,7 +4,7 @@ author: "By SC25014049"
 date: "2025/09/22"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to R-package}
+  %\VignetteIndexEntry{Introduction to R-package-Homework-2025.09.22}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
