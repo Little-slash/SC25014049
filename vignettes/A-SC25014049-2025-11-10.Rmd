@@ -1,0 +1,319 @@
+---
+title: "Homework-2025.11.10"
+author: "By SC25014049"
+date: "2025/11/10"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to R-package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,fig.width=7, fig.height=5, out.width="100%")
+```
+
+## Question1 
+implement a random walk Metropolis sampler for generating the standard Laplace distribution (see Exercise 3.3.2). For the increment, simulate from a normal distribution. Compare the chains generated when different variances are used for the proposal distribution. Also, compute the acceptance rates of each chain.
+
+For each of the above exercises, use the Gelman-Rubin method to monitor convergence of the chain, and run the chain until it converges approximately to the target distribution according to $\hat{R}$ < 1.2.
+## Answer1
+由题可得，标准laplace 分布为：
+$$
+f(x|u,b) =  \frac{1}{2b}e^{(-\frac{|x|}{b})}
+$$
+increment服从正态分布，均值为$X_{t-1}$，改变方差与EXample中一致为（0.05,0.5,2,16），同时采用Gelman-Rubin判断是否收敛，设置四条链，初始值分别为-10, 0, 10, 25,可不同方差的分布轨迹图如下:
+```{r,echo=FALSE,warning=FALSE}
+library(coda)
+set.seed(123)
+
+lap <- function(x) {
+  0.5 * exp(-abs(x))
+}
+
+
+lap_m <- function(sigma, x0, N) {
+  x <- numeric(N)
+  x[1] <- x0
+  u <- runif(N)
+  k <- 0  
+  
+  for(i in 2:N) {
+    y <- rnorm(1, x[i-1], sigma)
+
+    alpha_accept <- lap(y) / lap(x[i-1])
+    
+    if(u[i] < alpha_accept) {
+      x[i] <- y
+    } else {
+      x[i] <- x[i-1]
+      k <- k + 1
+    }
+  }
+  
+  acceptance_rate <- 1 - k / (N-1)
+  return(list(x = x, acceptance_rate = acceptance_rate))
+}
+
+run_until_converged <- function(sigma, x0_values, max_iter = 50000, target_rhat = 1.2) {
+  n_chains <- length(x0_values)
+  chains <- list()
+  acceptance_rates <- numeric(n_chains)
+  
+
+  iter <- 2000
+  for (j in 1:n_chains) {
+    result <- lap_m(sigma, x0_values[j], iter)
+    chains[[j]] <- result$x
+    acceptance_rates[j] <- result$acceptance_rate
+  }
+  
+  mcmc_chains <- lapply(chains, function(chain) mcmc(chain))
+  mcmc_list <- mcmc.list(mcmc_chains)
+  rhat <- gelman.diag(mcmc_list)$psrf[1]
+  
+
+  while (rhat > target_rhat && iter < max_iter) {
+    iter <- iter + 1000
+    for (j in 1:n_chains) {
+
+      new_result <- lap_m(sigma, tail(chains[[j]], 1), 1000)
+      chains[[j]] <- c(chains[[j]], new_result$x[-1])  # 去掉重复的第一个值
+      acceptance_rates[j] <- (acceptance_rates[j] * (iter-1000) + 
+                              new_result$acceptance_rate * 1000) / iter
+    }
+    
+    mcmc_chains <- lapply(chains, function(chain) mcmc(chain))
+    mcmc_list <- mcmc.list(mcmc_chains)
+    rhat <- gelman.diag(mcmc_list)$psrf[1]
+
+  }
+  
+  return(list(
+    chains = chains,
+    acceptance_rates = acceptance_rates,
+    final_iter = iter,
+    rhat = rhat
+  ))
+}
+
+# 主程序
+set.seed(123)
+N <- 10000
+sigma <- c(0.05, 0.5, 2, 16)
+x0_values <- c(-10, 0, 10, 25)
+
+results <- list()
+
+for(i in 1:length(sigma)) {
+  result <- run_until_converged(sigma[i], x0_values)
+  results[[as.character(sigma[i])]] <- result
+}
+
+par(mfrow = c(2, 2))
+
+
+for(i in 1:length(sigma)) {
+  sigma_val <- sigma[i]
+  result <- results[[as.character(sigma_val)]]
+  
+  plot(result$chains[[1]], type = "l", 
+       main = paste("sigma =", sigma_val, 
+                   "\n平均接受率 =", round(mean(result$acceptance_rates), 3),
+                   "\nRhat =", round(result$rhat, 3)),
+       xlab = "迭代", ylab = "x值",
+       ylim = c(-10, 30))
+  
+
+  for(j in 2:length(result$chains)) {
+    lines(result$chains[[j]], col = j)
+  }
+}
+
+```
+
+由图可以看出Metropolis对方差比较敏感，之后计算不同方差下的平均接受率，迭代次数和最后的$\hat{R}$，如下表:
+```{r,echo=FALSE}
+
+summary_table <- data.frame(
+  sigma = sigma,
+  avg_acceptance_rate = sapply(sigma, function(s) mean(results[[as.character(s)]]$acceptance_rates)),
+  final_iterations = sapply(sigma, function(s) results[[as.character(s)]]$final_iter),
+  final_rhat = sapply(sigma, function(s) results[[as.character(s)]]$rhat)
+)
+
+knitr::kable(summary_table)
+
+```
+
+
+## Question2
+This example appears in 41. Consider the bivariate density:
+$$
+f(x,y) \propto (^n_x)y^{x+a-1}(1-y)^(n-x+b-1), x=0,1,....,n, 0<=y<=1.
+$$
+It can be shown(see, e.g., 26)that for fixed a,b,n, the conditional distributions are Binomial(n,y)and Beta(x + a,n-x + b). Use the Gibbs sampler to generate a chain with target joint density f(x, y).
+
+For each of the above exercises, use the Gelman-Rubin method to monitor convergence of the chain, and run the chain until it converges approximately to the target distribution according to $\hat{R}$ < 1.2.
+
+## Answer2
+采用Gibbs采样法，利用$f(x|y)=Binomial(n, y),f(y|x)=Beta(x+a, n-x+b)$抽样$x_t,y_t$,并更新，同时也利用Gelman-Rubin方法判断，直到最后收敛,最终的$\hat{R}$值如下：以及收敛过程变化
+
+```{r,echo=FALSE}
+
+set.seed(123)
+library(coda)
+
+
+a <- 2
+b <- 3
+n <- 20
+nc <- 4 
+max_iter <- 50000 
+min_iter <- 5000   
+burn_ratio <- 0.3 
+
+# 收敛监控函数
+monitor_convergence <- function() {
+  cl <- list()  # 链列表
+  
+  for(cid in 1:nc) {
+
+    sm <- matrix(NA, nrow = max_iter, ncol = 2)
+    colnames(sm) <- c("x", "y")
+    
+
+    x_cur <- sample(0:n, 1)
+    y_cur <- runif(1)
+
+    for(i in 1:max_iter) {
+      x_cur <- rbinom(1, n, y_cur)
+      y_cur <- rbeta(1, x_cur + a, n - x_cur + b)
+      sm[i, ] <- c(x_cur, y_cur)
+    }
+    cl[[cid]] <- mcmc(sm)
+  }
+  
+  # 合并链
+  cc <- mcmc.list(cl)
+  return(cc)
+}
+
+
+iter <- min_iter
+converged <- FALSE
+final_chains <- NULL
+
+while(!converged) {
+
+  
+  # 运行采样
+  chains <- monitor_convergence()
+  
+  # 计算燃烧期后样本
+  burn_in <- floor(iter * burn_ratio)
+  chains_burned <- mcmc.list(
+    lapply(chains, function(x) mcmc(x[(burn_in+1):iter, ]))
+  )
+  
+  # 计算R_hat
+  gd <- gelman.diag(chains_burned, multivariate = FALSE)
+  r_hat <- gd$psrf[, 1]
+  # 
+  # cat("当前R_hat值 - x:", round(r_hat[1], 4), "y:", round(r_hat[2], 4), "\n")
+  
+  if(all(r_hat < 1.2)) {
+    converged <- TRUE
+    final_chains <- chains_burned
+    cat("最终R_hat值 - x:", round(r_hat[1], 4), "y:", round(r_hat[2], 4), "\n")
+  } 
+  else {
+    iter <- iter * 2
+    if(iter > max_iter) {
+      iter <- max_iter
+      final_chains <- chains_burned
+    }
+  }
+}
+
+final_gd <- gelman.diag(final_chains)
+# print(final_gd)
+
+par(mfrow = c(1, 2))
+# 绘制收敛图
+gelman.plot(final_chains)
+```
+
+同时绘制X,Y的轨迹图，如下：
+
+```{r,echo=FALSE}
+
+# 提取合并样本
+all_samps <- do.call(rbind, final_chains)
+x_samps <- all_samps[, "x"]
+y_samps <- all_samps[, "y"]
+
+
+df <- data.frame(x = x_samps, y = y_samps)
+chain1_x <- final_chains[[1]][, "x"]
+plot(chain1_x, type = "l", col = "blue", 
+     main = "X的轨迹图（第一条链）", xlab = "迭代", ylab = "x值")
+
+# 6. Y的轨迹图（第一条链）
+chain1_y <- final_chains[[1]][, "y"]
+plot(chain1_y, type = "l", col = "red", 
+     main = "Y的轨迹图（第一条链）", xlab = "迭代", ylab = "y值")
+```
+
+## Quetsion3
+
+考虑模型$P(Y=1|X_1,X_2,X_3) = \frac{1}{1+e^{-(a+b_1x_1+b_2x_2+b_3x_3)}}$, $X_1$ ~ Poi(1),$X_2$ ~ Exp(1),$X_3$ ~ B(1,0.5).
+
+1.写一个R函数实现slide P11的功能，其输入值为$N，b1,b2,b3,f_0$,输出值为$\alpha$
+2.调用该函数，输入值为$N=10^6,b_1=1,b_2=1,b_3=-1,f_0=0.1,0.01,0.001,0.0001.
+
+## Answer3
+
+由图首先生成三个分布的X之后带入公式，采用数值方法求解，调用结果如下表:
+```{r,echo=FALSE}
+set.seed(12345)
+
+model <-function(N,b1,b2,b3,f0){
+  X1 <- rpois(N, 1)    
+  X2 <- rexp(N, 1)             
+  X3 <- rbinom(N, 1,0.5)
+  
+  g <- function(alpha) {
+
+    tmp <- alpha + b1 * X1 + b2 * X2 + b3 * X3
+    p <- 1 / (1 + exp(tmp))
+    
+    mean(p) - f0
+  }
+  alpha <- uniroot(g,c(-20,20))$root
+  return (alpha)
+  
+}
+
+
+
+N <- 10^6
+b1 <- 1
+b2 <- 1
+b3 <- -1
+f0_values <- c(0.1, 0.01, 0.001, 0.0001)
+
+results <- data.frame(
+  f0 = f0_values,
+  alpha1 = numeric(length(f0_values))
+  
+)
+
+for (i in seq_along(f0_values)) {
+
+  alpha_result <- model(N, b1, b2, b3, f0_values[i])
+  results$alpha1[i] <- alpha_result
+}
+knitr::kable(t(results))
+
+```

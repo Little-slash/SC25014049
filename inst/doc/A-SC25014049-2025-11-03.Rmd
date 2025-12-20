@@ -1,0 +1,152 @@
+---
+title: "Homework-2025.11.03"
+author: "By SC25014049"
+date: "2025/11/03"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to R-package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question1 
+
+Exercise-10.3:
+Write a function to compute the two-sample Cramer-von Mises statistic.The Cramér-von Mises distance between distributions is
+$$
+\omega^2 = \int\int(F(x)-G(y))^2dH(x,y)
+$$
+where H(x,y) is the joint CDF of X and Y. For a test of equal distributions, the corresponding test statistic is based on the joint empirical distributions, so it is a function of the ranks of the data. First, compute the ranks $r_i$ of the X sample, i= 1,...,n, and the ranks $s_j$ of the Y sample, j=1,...,m (see the rank function). Compute
+$$
+U = n\sum_{i=1}^n(r_i-i)^2+m\sum_{j=1}^m(s_j-j)^2.
+$$
+Note that U can be vectorized and evaluated in one line of R code. Then the Cramér-von Mises two-sample statistic is
+$$
+W^2=\frac{U}{nm(n+m)}-\frac{4mn-1}{6(m+n)}.
+$$
+Large values of $W^2$ are significant.
+
+## Answer1
+
+由题，编写一个函数计算 Cramer-von Mises 统计量,其中U使用一行代码进行向量化，为了验证编写正确，生成两个相同分布的样本计算其$W^2$值
+```{r,echo=FALSE}
+cvm <- function(x, y) {
+  x1 <- length(x)
+  x2 <- length(y)
+  r <- rank(c(x, y))
+  r_x <- r[1:x1]
+  r_y <- r[(x1 + 1):(x1 + x2)]
+  U <- x1 * sum((r_x - 1:x1)^2) + x2 * sum((r_y - 1:x2)^2)
+  W2 <- U / (x1 * x2 * (x1 + x2)) - (4 * x2 * x1 - 1) / (6 * (x2 + x1))
+  return(W2)
+}
+set.seed(123)
+
+x <- rnorm(100,0,1)
+y <- rnorm(100,0,1)
+w2 = cvm(x, y)
+
+sample3 <- rnorm(100, 0,1)
+sample4 <- rnorm(100,100,10) 
+w2_1 <- cvm(sample3, sample4)
+
+knitr::kable(data.frame(
+  "相同分布的W^2:"= w2,
+  "不同分布的W^2:"= w2_1
+))
+
+```
+
+## Question2
+
+Exercise-10.7
+The Count 5 test for equal variances in Section 7.4 is based on the maximum number of extreme points. Example 7.15 shows that the Count 5 criterion is not applicable for unequal sample sizes. Implement a permutation test for equal variance based on the maximum number of extreme points that applies when sample sizes are not necessarily equal. Repeat Example 7.15 using the permutation test.
+
+## Answer2
+
+由题可得，使用置换检验来解决7.15中在样本大小不等时Type I错误率控制不佳的问题，首先计算count-five 统计量，数据减去样本均值，之后进行1000次随机置换，计算p值，之后用原假设为真的数据集，计算错误拒绝原假设的比例。与例7.15中保持一致，计算错误率和标准差（se），可得以下结果
+```{r,echo=FALSE}
+
+centered <- function(x, y) {
+  x <- x - mean(x)
+  y <- y - mean(y)
+  outx <- sum(x > max(y)) + sum(x < min(y))
+  outy <- sum(y > max(x)) + sum(y < min(x))
+  return(max(c(outx, outy)))
+}
+
+p_test <- function(x, y, R = 1000) {
+  n1 <- length(x)
+  n2 <- length(y)
+  combined <- c(x, y)
+  T_obs <- centered(x, y)
+  
+  T_perm <- replicate(R, {
+    perm <- sample(combined)
+    x_perm <- perm[1:n1]
+    y_perm <- perm[(n1 + 1):(n1 + n2)]
+    centered(x_perm, y_perm)
+  })
+  
+  p_ <- mean(T_perm >= T_obs)
+  return(p_)
+}
+
+n1 <- 20
+n2 <- 30
+mu1 <- 0
+mu2 <- 0
+sigma1 <- 1
+sigma2 <- 1
+m <- 10000
+R <- 100   
+
+set.seed(123) 
+e_rej <- numeric(m) 
+
+for (i in 1:m) {
+  x <- rnorm(n1, mu1, sigma1)
+  y <- rnorm(n2, mu2, sigma2)
+  p_ <- p_test(x, y, R)
+  e_rej[i] <- (p_ < 0.05)
+}
+
+
+alphahat <- mean(e_rej)
+se <- sqrt(alphahat * (1 - alphahat) / m)
+
+knitr::kable(data.frame(
+  "TIe rate-est"= alphahat,
+  "stad.error"= se
+))
+```
+
+
+## Quetsion3
+Prove that the stationary distribution of the M-H sampler with
+proposal distribution g(r|s) is the target distribution f (x) in
+the CONTINUOUS case.
+
+## Answer3
+由题得:
+$$
+K(r,s) = I(s\neq r)\alpha(r,s)g(s|r)+I(s=r)[1-\int\alpha(r,s)g(s|r)]\\
+要证：K(s,r)f(s) = K(r,s)f(r)
+$$
+当r=s时K(r,r)f(r)=K(r,r)f(r)成立
+当$r\neq s$时，由于$\alpha(s,r) = min{\frac{f(r)g(s|r)}{f(s)g(r|s)},1}$
+假设$\frac{f(r)g(s|r)}{f(s)g(r|s)}>1$,则
+$$
+f(r)K(r,s)=f(r)\alpha(r,s)g(s|r)=f(r)*\frac{f(s)g(r|s)}{f(r)g(s|r)}*g(s|r)=f(s)g(r|s) \\
+f(s)K(s,r)=f(s)\alpha(s,r)g(r|s)=f(s)*1*g(r|s)=f(s)g(r|s)
+$$
+故左边等于右边，得证，当$\frac{f(r)g(s|r)}{f(s)g(r|s)}<=1$时
+$$
+f(r)K(r,s)=f(r)\alpha(r,s)g(s|r)=f(r)g(s|r) \\
+f(s)K(s,r)=f(s)\alpha(s,r)g(r|s)=f(s)*\frac{f(r)g(s|r)}{f(s)g(r|s)}*g(r|s)=f(r)g(s|r)
+$$
+得证。

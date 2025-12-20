@@ -1,0 +1,384 @@
+---
+title: "Homework-2025.09.22"
+author: "By SC25014049"
+date: "2025/09/22"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to R-package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,fig.width=7, fig.height=5, out.width="100%")
+```
+
+## Question1
+
+The Rayleigh density is
+$$
+f(x) = \frac{x}{\sigma^2}e^{-x^2/(2\sigma^2)},\qquad x\ge0,\sigma>0 \tag{1.1}.
+$$
+Develop an algorithm to generate random samples from a Rayleigh($\sigma$)distribution. Generate Rayleigh($\sigma$)samples for several choices of $\sigma$ >0 and check that the mode of the generated samples is close to the theoretical mode $\sigma$ (check the histogram).
+
+## Answer1
+
+### 1.1 求解逆函数
+
+由于目标函数比较容易积分，采用逆函数法求随机数，令CDF为$F_X(x)$，则
+
+$$
+F_X(x) = \int_{0}^{x}f(x) = 1-e^{-x^2/(2\sigma^2)} \tag{1.2}
+$$
+
+
+令$\sigma=1$，则逆函数为
+
+$$
+F_X^{-1}(x)=\sigma\sqrt{-2ln(1-F(x))} \tag{1.3}
+$$
+
+### 1.2 生成符合条件的变量
+
+利用逆函数生成符合条件的分布f(x),前几行:
+
+```{r, echo=FALSE}
+set.seed(123)
+
+r <- runif(1000)
+sigma1 <- 1
+x <- sigma1*sqrt(-2*log(1-r))
+knitr::kable(head(x))
+```
+
+### 1.3 结果验证
+
+接下来检验生成的样本是否符合$\sigma=1$的R分布，利用hist与curve函数作图如下:
+
+```{r,echo=FALSE}
+hist(x,breaks = 30,prob = TRUE, main="Rayleigh distribution")
+curve((x/sigma1^2)*exp(-x^2/2/sigma1^2),add = TRUE, col="red",lwd = 2)
+
+```
+
+
+尝试$\sigma = 2$分布图像如下:
+
+```{r, echo=FALSE}
+
+set.seed(123)
+
+r <- runif(1000)
+sigma1 <- 2
+x <- sigma1*sqrt(-2*log(1-r))
+hist(x,breaks = 30,prob = TRUE, main="Rayleigh distribution")
+curve((x/sigma1^2)*exp(-x^2/2/sigma1^2),add = TRUE, col="red",lwd = 2)
+
+```
+
+## Question2
+
+A discrete random variable X has probability mass function
+
+```{r,echo=FALSE}
+my_data <- data.frame(
+  x = c(0,1,2,3,4),
+  "p(x)" = c(0.1, 0.2, 0.2, 0.2,0.3) 
+)
+
+knitr::kable(t(my_data))
+
+```
+Use the inverse transform method to generate a random sample of size 1000 from the distribution of X. Construct a relative frequency table and compare the empirical with the theoretical probabilities. Repeat using thg R sample function.
+
+## Answer2
+
+### 2.1 求解逆函数
+
+由于题中是离散分布,所以CDF函数为:
+
+$$
+F_X(x) = \sum_ip_i, \quad(x_i\leq x)
+$$
+
+则
+
+\begin{equation}
+F_X(x) = \begin{cases}
+0, & x<0 | x>4\\
+0.1, & 0\leq x<1 \\
+0.3, & 1\leq x< 2 \\
+0.5, & 2\leq x< 3 \\
+0.7, & 3\leq x< 4 \\
+1,   & x =  4 \\
+
+
+\end{cases}
+\end{equation}
+
+图像如图所示:
+
+```{r, echo=FALSE}
+
+x <- c(-1, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5)
+y <- c(0, 0, 0.1, 0.1, 0.3, 0.3, 0.5, 0.5, 0.7, 0.7, 1, 1)
+
+plot(x, y, type = "s", lwd = 2, col = "blue",
+     main = "离散随机变量X的累积分布函数",
+     xlab = "x", ylab = "F(x)",
+     xlim = c(-0.5, 4.5), ylim = c(0, 1.1),
+     xaxt = "n", yaxt = "n")
+axis(1, at = -1:5)
+axis(2, at = seq(0, 1, by = 0.1))
+points(4, 1, pch = 16, col = "red", cex = 1.5)
+points(c(0,1,2,3), c(0.1,0.3,0.5,0.7), pch = 1, col = "blue", cex = 1.5)
+
+```
+
+则其逆函数为:
+$F_X^{-1}(u) = x_i,\quad F_X(x_{i-1})<u<F_X(x_i) \tag{1.1}$
+
+### 2.2 生成符合逆函数分布的变量
+
+采用findInterval函数生成变量，其前几行如下:
+
+```{r,echo=FALSE}
+set.seed(123)
+x <- c(0,1,2,3,4)
+p <- c(0.1, 0.2, 0.2, 0.2, 0.3)
+cp <- cumsum(p)
+m <- 1000
+U = runif(m)
+r <- x[findInterval(U,cp)+1]
+knitr::kable(head(r))
+```
+
+
+
+### 2.3 结果分析
+
+将所生成的分布构建相对频率表与用sample函数生成的分布进行比较,表格如下:
+
+```{r, echo=FALSE}
+ct1 <- as.vector(table(r))
+set.seed(123)
+compare2 = sample(0:4,size = 1000,replace = TRUE,prob = c(.1,.2,.2,.2,.3))
+ct2<- as.vector(table(compare2))
+
+knitr::kable(t(data.frame("Inverse_Transform"=ct1/1000,
+                          "Sample_Function"=ct2/1000,
+                          "Theoretical" = c(0.1,0.2,0.2,0.2,0.3)
+                          )),caption = "comparison of empirical and theorectical")
+```
+
+## Question3
+
+Write a function to generate a random sample of size n from the Beta(a,b) distribution by the acceptance-rejection method. Generate a random sample of size 1000 from the Beta(3.2) distribution. Graph the histogram of the sample with the theoretical Beta(3,2) density superimposed.
+
+## Answer3
+
+### 3.1 设置建议分布和c值
+
+beta(3,2)分布,由beta分布定义可得
+
+$$
+f(x;3,2) =  \frac{x^2(1-x)}{B(3，2)} = 12x^2(1-x) \quad 0\leq x\leq 1
+$$
+
+由于目标分布是beta分布,则设置建议分布g(·)=U(0,1)，同时生成均匀分布随机数作为接受和舍去的主体。其接受的最大值c = f_max时,x = 2/3,c = 4/27.
+
+### 3.2 生成目标分布
+
+如果生成的随机数$x\leq 27/4*x^2(1-x)$则接受该值,则求得beta分布前几行如下:
+
+```{r, echo=FALSE}
+
+set.seed(123)
+
+count <- 0
+
+y <- numeric(1000)
+c <- 4/27
+while (count < 1000) {
+  
+    x_candi <- runif(1)
+    
+    f_x <- x_candi^2 * (1-x_candi)
+    u <- runif(1)
+    
+    if (u <= f_x / c) {
+      count <- count + 1
+      y[count] <- x_candi
+    }
+}
+knitr::kable(head(y))
+
+```
+
+### 3.3 结果分析
+
+绘制beta分布图,并叠加理论的分布曲线，如下图:
+
+```{r, echo=FALSE}
+
+x_vals <- seq(0, 1, length.out = 1000)
+theory_density <- dbeta(x_vals, 3, 2)
+
+hist(y, prob = TRUE, breaks = 30, col = "blue",
+     main = "Beta(3,2)分布的接受-拒绝采样结果",
+     xlab = "x", ylab = "密度", ylim = c(0, 2.0))
+lines(x_vals, theory_density, col = "red", lwd = 2)
+
+legend("topleft", legend = c("sample", "theoretical"), 
+       fill = c("blue", "red"))
+
+
+```
+
+
+
+## Question4
+
+Generate a random sample of size 1000 from a normal location mixture.The components of the mixture have N(0, 1)and N(3, 1) distributions with mixing probabilities $p_1$ and $p_2$=1-$p_1$ Graph the histogram of the sample with density superimposed, for $p_1$= 0.75. Repeat with different values for $p_1$, and observe whether the empirical distribution of the mixture appears to be bimodal, Make a conjecture about the values of $p_1$ that produce bimodal mixtures.
+
+## Answer4
+
+### 4.1 构造生成目标分布的函数
+
+有题可知，本题需要尝试不同的$p_1$值，因此需要提前构建以$p_1$为输入的函数。两个独立正态分布以不同的概率混合，为混合分布。要混合不同正态分布，首先要生成两个分布的随机数，
+两个正态分布的概率混合，其形状取决于混合概率$p_1$。混合分布可能呈现单峰或双峰，首先尝试 $p_1 =0.75$,生成一个均匀随机数,U~U(0,1),如果$x<p_1$,则从N(0,1)中生成一个随机数,否则在N(3,1)中生成。重复此过程1000次。
+
+```{r,echo=FALSE}
+mix_normal <- function(num, p1){
+  set.seed(123)
+  count <- 1
+  y <- numeric(num+1)
+  
+  while(count<=num){
+    r <- runif(1)
+    if(r<=p1) {
+      re  <- rnorm(1,0,1)
+      y[count] <- re
+      count <- count+1
+    }
+    else{
+      re <- rnorm(1,3,1)
+      y[count] <- re
+      count <- count+1
+    }
+  }
+  return(y)
+}
+
+knitr::kable(head(mix_normal(1000,0.75)))
+
+```
+
+同时需要构造绘图的函数,以$p_1 =  0.75$为例,作下图:
+
+```{r,echo=FALSE}
+
+paint <- function(p1, n = 1000){
+  sample = mix_normal(1000,p1)
+  
+  mixture_density <- function(x) {
+      p1 * dnorm(x, mean = 0, sd = 1) + (1 - p1) * dnorm(x, mean = 3, sd = 1)
+  }
+  
+  hist(sample, breaks = 50, freq = FALSE, main = paste("Mixture with p1 =", p1),xlab = "x", ylab = "Density", col = "blue", border = "white")
+  
+  x <- seq(min(sample), max(sample), length.out = 1000)
+  lines(x, mixture_density(x), col = "red", lwd = 2)
+
+  legend("topright", legend = c("Histogram", "Density Curve"), 
+         col = c("blue", "red"), lwd = c(2, 2), bty = "n")
+}
+paint(0.75)
+
+```
+
+### 4.2 尝试不同p值
+
+尝试不同p值确定双峰的p值范围,可得下图，并猜测双峰性的范围
+
+```{r,echo=FALSE}
+
+par(mfrow = c(3, 3))
+p1_values <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
+
+for (p1 in p1_values) {
+  paint(p1)
+}
+
+par(mfrow = c(1, 1))
+
+
+```
+
+由上图可看出，在0.3-0.75范围左右会呈现比较明显的双峰性。
+
+## Question5
+
+Simulate a continuous Exponential-Gamma mixture. Suppose that the rate parameter $\Lambda$ has Gamma(r, $\beta$) distribution and Y has Exp($\Lambda$) distribution. That is,$(Y|\Lambda=λ)\sim f_Y(y|λ)=λe^{-λy}$. Generate 1000 random observations from this mixture with r=4 and $\beta$=2.
+
+## Answer5
+
+### 5.1 生成两种分布
+
+题中为指数-伽马混合分布，
+指数分布即设随机变量X具有如下形式的密度函数，则X服从参数为$\lambda$的指数分布,记为X~EXP($\lambda$):
+\begin{equation}
+F_X(x) = \begin{cases}
+0, & x\leq 0 \\
+\lambda e^(-\lambda x),   & x>0  \\
+
+
+\end{cases}
+\end{equation}
+伽马分布其概率密度函数为:
+  $$
+  P\gamma(x|\alpha ,1/\beta)=\frac{\beta^{\alpha}}{\Gamma(\alpha)}x^{\alpha-1}e^{-\beta x},\quad \alpha>0,\beta>0
+  $$
+
+先从一个伽马分布中生成参数，再用这个参数生成另一个分布的观测值。
+
+```{r,echo=FALSE}
+
+set.seed(123)
+r <- 4
+theta_scale <- 2
+n <- 1000
+lambda <- rgamma(n, shape = r, scale = theta_scale)
+knitr::kable(head(lambda, 10))
+
+```
+
+### 5.2 结果分析
+
+利用rexp函数生成指定混合分布,其前10行如下:
+```{r,echo=FALSE}
+
+Y <- rexp(n, rate = lambda)
+
+knitr::kable(head(Y, 10),caption = "\n前10个观测值:\n")
+```
+
+如题的指数-伽马混合分布的理论均值应为$1/(\beta*(r-1))$
+
+```{r, echo=FALSE}
+mean_Y <- mean(Y)
+print(paste("生成变量的均值为", round(mean_Y, 4)))
+
+```
+二者较为接近故，所生成随机数与理论相符。
+生成该分布的直方图如下:
+
+
+
+```{r,echo=FALSE}
+
+hist(Y, breaks = 30, main = "Exponential-Gamma Mixture (r=4, scale=2)", 
+     xlab = "Y", col = "lightblue")
+
+```
+

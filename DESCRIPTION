@@ -1,0 +1,17 @@
+Package: SC25014049
+Type: Package
+Title: Conduct data analysis for TGA and DSC
+Version: 1.0
+Date: 2025-12-08
+Author: Fenghao Lu
+Maintainer: Fenghao Lu <lfh3485188464@163.com>
+Description: Several R and Rcpp function are included in this package for illustration. 
+License: GPL (>= 2)
+Imports: Rcpp, graphics, stats
+Suggests: knitr, rmarkdown
+LinkingTo: Rcpp
+RoxygenNote: 7.3.3
+Encoding: UTF-8
+VignetteBuilder:knitr
+URL:https://github.com/Little-slash/SC25014049
+BugReports:https://github.com/Little-slash/SC25014049/issues

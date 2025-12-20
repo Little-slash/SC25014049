@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="By SC25014049" />
+
+
+<title>Homework-2025.09.29</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Homework-2025.09.29</h1>
+<h4 class="author">By SC25014049</h4>
+<h4 class="date">2025/09/29</h4>
+
+
+
+<div id="question1" class="section level2">
+<h2>Question1</h2>
+<p>Exercise-6.4: Write a function to compute a Monte Carlo estimate of
+the Beta(3,3) cdf,and use the function to estimate F(x) for x =
+0.1,0.2,…,0.9. Compare the estimates with the values returned by the
+pbeta functionin R.</p>
+</div>
+<div id="answer1" class="section level2">
+<h2>Answer1</h2>
+<p>首先生成符合beta分布的样本,样本数设置为1e5，之后求样本均值，并写出函数(函数名为”monte_beta”),同时利用pbeta函数可生成真是cdf值,生成不同X值的F(x)的估计值,比较可得估计值很相近,如下表:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="right">X值</th>
+<th align="right">蒙特卡洛积分估计值</th>
+<th align="right">pbeta-真实值</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.1</td>
+<td align="right">0.00907</td>
+<td align="right">0.00856</td>
+</tr>
+<tr class="even">
+<td align="right">0.2</td>
+<td align="right">0.05883</td>
+<td align="right">0.05792</td>
+</tr>
+<tr class="odd">
+<td align="right">0.3</td>
+<td align="right">0.16417</td>
+<td align="right">0.16308</td>
+</tr>
+<tr class="even">
+<td align="right">0.4</td>
+<td align="right">0.31830</td>
+<td align="right">0.31744</td>
+</tr>
+<tr class="odd">
+<td align="right">0.5</td>
+<td align="right">0.49959</td>
+<td align="right">0.50000</td>
+</tr>
+<tr class="even">
+<td align="right">0.6</td>
+<td align="right">0.68318</td>
+<td align="right">0.68256</td>
+</tr>
+<tr class="odd">
+<td align="right">0.7</td>
+<td align="right">0.83667</td>
+<td align="right">0.83692</td>
+</tr>
+<tr class="even">
+<td align="right">0.8</td>
+<td align="right">0.94235</td>
+<td align="right">0.94208</td>
+</tr>
+<tr class="odd">
+<td align="right">0.9</td>
+<td align="right">0.99185</td>
+<td align="right">0.99144</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="qusetion2" class="section level2">
+<h2>Qusetion2</h2>
+<p>Exercise-6.6: In Example 6.7 the control variate approach was
+illustrated for Monte-Carlo integration of</p>
+<p><span class="math display">\[
+\theta = \int_{0}^{1}e^xdx.
+\]</span></p>
+<p>Now consider the antithetic variate approach. Compute <span class="math inline">\(Cov(e^U,e^{1-U})\)</span> and <span class="math inline">\(Var(e^{U}+e^{1-U})\)</span>, where U ~
+Uniform(0,1). What is the percent reduction in variance of <span class="math inline">\(\hat{\theta}\)</span> that can be achieved using
+antithetic variates (compared with simple MC)?</p>
+</div>
+<div id="answer2" class="section level2">
+<h2>Answer2</h2>
+<div id="计算协方差等" class="section level3">
+<h3>2.1 计算协方差等</h3>
+<p>利用antithetic方法首先需要计算<span class="math inline">\(Cov(e^U,e^{1-U})\)</span>和<span class="math inline">\(Var(e^U + e^{1-U})\)</span> 其中 <span class="math display">\[
+Var(e^U + e^{1-U})== Var(e^U) + Var(e^{1-U}) + 2Cov(e^U, e^{1-U})\\
+E[e^U] = ∫_0^1 e^u du = e - 1
+\]</span> 而 <span class="math display">\[
+Var(e^U) = E[e^{2U}]-\theta^2 = \frac{e^2-1}{2}-(e-1)^2=-e^2/2-3/2+2e
+\]</span> 由于 <span class="math display">\[
+E[e^{1-U}] = E[e^U] = e-1
+\]</span> 则 <span class="math display">\[
+Cov(e^U, e^{1-U}) = E[e^U * e^{1-U}] - E[e^U]E[e^{1-U}] = e - (e-1)^2 =
+-e^2+3e-1
+\]</span></p>
+<p>则 <span class="math display">\[
+Var(e^U + e^{1-U}) = 2*(-e^2/2-3/2+2e)+2*(-e^2+3e-1) = 0.01565
+\]</span></p>
+</div>
+<div id="方差减少百分比计算" class="section level3">
+<h3>2.2 方差减少百分比计算</h3>
+<p>利用之前所求<span class="math inline">\(Var(e^{U}+e^{1-U})\)</span>方差比率与方差减少百分比。结果如下；</p>
+<pre><code>## [1] &quot;方差减少百分比 = 98.383502%&quot;</code></pre>
+</div>
+</div>
+<div id="question3" class="section level2">
+<h2>Question3:</h2>
+<p>Exercise-6.13: Find two importance functions f1 and f2 that are
+supported on <span class="math inline">\((1, \infty)\)</span> and are
+“close” to <span class="math display">\[
+g(x) = \frac{x^2}{\sqrt{2\pi}}e^{-x^2/2}, \quad x&gt;1
+\]</span> Which of your two importance functions should produce the
+smaller variance in estimating <span class="math display">\[
+\int_{1}^{\infty}\frac{x^2}{\sqrt{2\pi}}e^{-x^2/2}dx
+\]</span></p>
+<p>by importance sampling? Explain.</p>
+</div>
+<div id="answer3" class="section level2">
+<h2>Answer3</h2>
+<div id="寻找重要性函数" class="section level3">
+<h3>3.1 寻找重要性函数</h3>
+<p>首先为了寻找目标函数，需要先寻找目标函数的特征，考虑目标函数为<span class="math inline">\(x^2*\phi(x)\)</span>,则两个重要性函数可使用截断的正态分布，为:
+<span class="math display">\[
+f_1(x)=\frac{\phi(x)}{1-\Phi(x)},\quad x&gt;1
+\]</span> 以及一个指数分布: <span class="math display">\[
+f_2(x) = e^{-(x-1)},\quad x&gt;1
+\]</span></p>
+<p>这两个都定义在<span class="math inline">\((1,
+\infty)\)</span>上，且与<span class="math inline">\(g(x)\)</span>形状相似。<span class="math inline">\(f_2\)</span>具有指数尾部，而<span class="math inline">\(f_1\)</span>具有高斯尾部，作图可以查看两个重要性函数与目标函数:
+<img role="img" src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="方差比较" class="section level3">
+<h3>3.2 方差比较</h3>
+<p>可以直接从两个函数分布中取样，计算结果方差的方式进行比较。可得方差结果如下:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="right">使用f1(x)的方差</th>
+<th align="right">使用f2(x)的方差</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">7e-07</td>
+<td align="right">2e-07</td>
+</tr>
+</tbody>
+</table>
+<p>由表可得f2的方差更小。</p>
+</div>
+</div>
+<div id="question4" class="section level2">
+<h2>Question4</h2>
+<p>Monte Carlo experiment:’</p>
+<ul>
+<li><p>For <span class="math inline">\(n = 10^4, 2 × 10^4, 4 × 10^4, 6 ×
+10^4, 8 × 10^4\)</span>, apply the fast sorting algorithm (R function
+sort) to randomly permuted numbers of 1, . . . , n. </p></li>
+<li><p>Use R function rbenchmark::benchmark to count computation time
+(with 1000 replications), denoted by <span class="math inline">\(a_n\)</span>.</p></li>
+<li><p>I Regress an on <span class="math inline">\(t_n :=
+nlog(n)\)</span>, and graphically show the results (scatter plot and
+regression line).</p></li>
+</ul>
+</div>
+<div id="answer4" class="section level2">
+<h2>Answer4</h2>
+<div id="记录时间" class="section level3">
+<h3>4.1 记录时间</h3>
+<p>首先对不同n值的乱序数字进行快排，benchmark记录时间,结果如下表所示:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">test</th>
+<th align="right">replications</th>
+<th align="right">elapsed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">a_1</td>
+<td align="right">1000</td>
+<td align="right">0.58</td>
+</tr>
+<tr class="even">
+<td align="left">a_2</td>
+<td align="right">1000</td>
+<td align="right">1.13</td>
+</tr>
+<tr class="odd">
+<td align="left">a_3</td>
+<td align="right">1000</td>
+<td align="right">2.26</td>
+</tr>
+<tr class="even">
+<td align="left">a_4</td>
+<td align="right">1000</td>
+<td align="right">3.37</td>
+</tr>
+<tr class="odd">
+<td align="left">a_5</td>
+<td align="right">1000</td>
+<td align="right">4.80</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="对时间进行回归分析" class="section level3">
+<h3>4.2 对时间进行回归分析</h3>
+<p>对不同n值的benchmark时间进行线性回归，如下图:</p>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

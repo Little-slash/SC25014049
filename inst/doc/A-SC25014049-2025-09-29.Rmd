@@ -1,0 +1,265 @@
+---
+title: "Homework-2025.09.29"
+author: "By SC25014049"
+date: "2025/09/29"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to R-package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question1 
+Exercise-6.4:
+Write a function to compute a Monte Carlo estimate of the Beta(3,3) cdf,and use the function to estimate F(x) for x = 0.1,0.2,...,0.9. Compare the estimates with the values returned by the pbeta functionin R.
+
+## Answer1
+
+首先生成符合beta分布的样本,样本数设置为1e5，之后求样本均值，并写出函数(函数名为"monte_beta"),同时利用pbeta函数可生成真是cdf值,生成不同X值的F(x)的估计值,比较可得估计值很相近,如下表:
+
+```{r,echo=FALSE}
+
+monte_beta <- function(x, n=100000){
+  
+  samples <- rbeta(n, 3, 3)
+  return(mean(samples <= x))
+  
+}
+x_ <-seq(0.1,0.9,0.1) 
+
+est = rep(0,9)
+
+for(i in 1:9){
+  est[i] <- monte_beta(x_[i])
+  
+}
+
+true_values <- pbeta(x_, 3, 3)
+
+result = cbind(x_,est,true_values)
+df1 = data.frame(result)
+colnames(df1) <- c("X值", "蒙特卡洛积分估计值","pbeta-真实值")
+knitr::kable(df1)
+
+```
+
+
+## Qusetion2
+Exercise-6.6:
+In Example 6.7 the control variate approach was illustrated for Monte-Carlo integration of
+
+
+$$
+\theta = \int_{0}^{1}e^xdx.
+$$
+
+
+
+Now consider the antithetic variate approach. Compute $Cov(e^U,e^{1-U})$ and $Var(e^{U}+e^{1-U})$, where U ~ Uniform(0,1). What is the percent reduction in variance of $\hat{\theta}$ that can be achieved using antithetic variates (compared with simple MC)?
+
+## Answer2
+
+### 2.1 计算协方差等
+
+利用antithetic方法首先需要计算$Cov(e^U,e^{1-U})$和$Var(e^U + e^{1-U})$
+其中
+$$
+Var(e^U + e^{1-U})== Var(e^U) + Var(e^{1-U}) + 2Cov(e^U, e^{1-U})\\
+E[e^U] = ∫_0^1 e^u du = e - 1
+$$
+而
+$$
+Var(e^U) = E[e^{2U}]-\theta^2 = \frac{e^2-1}{2}-(e-1)^2=-e^2/2-3/2+2e
+$$
+由于
+$$
+E[e^{1-U}] = E[e^U] = e-1
+$$
+则 
+$$
+Cov(e^U, e^{1-U}) = E[e^U * e^{1-U}] - E[e^U]E[e^{1-U}] = e - (e-1)^2 = -e^2+3e-1 
+$$
+
+则
+$$
+Var(e^U + e^{1-U}) = 2*(-e^2/2-3/2+2e)+2*(-e^2+3e-1) = 0.01565
+$$
+
+### 2.2 方差减少百分比计算
+
+利用之前所求$Var(e^{U}+e^{1-U})$方差比率与方差减少百分比。结果如下；
+```{r,echo=FALSE}
+
+var_eu <- -1*exp(1)*exp(1)/2-3/2+2*exp(1)
+var_sum <- 0.01565
+
+variance_ratio <- (1/4 * var_sum) / var_eu
+
+percent_reduction <- (1 - variance_ratio) * 100
+
+message <- sprintf("方差减少百分比 = %f%%",percent_reduction)
+print(message)
+
+```
+
+
+## Question3:
+Exercise-6.13:
+Find two importance functions f1 and f2 that are supported on $(1, \infty)$ and are “close” to
+$$
+g(x) = \frac{x^2}{\sqrt{2\pi}}e^{-x^2/2}, \quad x>1
+$$
+Which of your two importance functions should produce the smaller variance in estimating
+$$
+\int_{1}^{\infty}\frac{x^2}{\sqrt{2\pi}}e^{-x^2/2}dx
+$$
+
+
+by importance sampling? Explain.
+
+## Answer3
+
+### 3.1 寻找重要性函数
+
+首先为了寻找目标函数，需要先寻找目标函数的特征，考虑目标函数为$x^2*\phi(x)$,则两个重要性函数可使用截断的正态分布，为:
+$$
+f_1(x)=\frac{\phi(x)}{1-\Phi(x)},\quad x>1
+$$
+以及一个指数分布:
+$$
+f_2(x) = e^{-(x-1)},\quad x>1
+$$
+
+这两个都定义在$(1, \infty)$上，且与$g(x)$形状相似。$f_2$具有指数尾部，而$f_1$具有高斯尾部，作图可以查看两个重要性函数与目标函数:
+```{r,echo=FALSE}
+
+g <- function(x) {
+  (x^2 / sqrt(2*pi)) * exp(-x^2/2)
+}
+
+f1 <- function(x) {
+  dnorm(x) / (1 - pnorm(1))
+}
+
+
+f2 <- function(x) {
+  return(exp(-1*(x-1)))
+}
+
+x_3 <- seq(1, 5, 0.001)
+g_x <- g(x_3)
+f1_x <- f1(x_3)
+f2_x <- f2(x_3)
+
+plot(x_3, g_x, type = "l", lwd = 2, col = "black", 
+     ylab = "Density", main = "函数比较")
+lines(x_3, f1_x, col = "red", lwd = 2)
+lines(x_3, f2_x, col = "blue", lwd = 2)
+legend("topright", legend = c("g(x)", "f1(x): 截断正态", "f2(x): 截断Gamma"),
+       col = c("black", "red", "blue"), lwd = 2)
+```
+
+
+### 3.2 方差比较
+
+可以直接从两个函数分布中取样，计算结果方差的方式进行比较。可得方差结果如下:
+
+```{r,echo=FALSE}
+
+set.seed(123)
+n <- 100000
+
+u1 <- runif(n)
+samples_f1 <- qnorm(pnorm(1) + u1 * (1 - pnorm(1)))
+weights_f1 <- g(samples_f1) / f1(samples_f1)
+est_f1 <- mean(weights_f1)
+variance_f1 <- var(weights_f1) / n
+
+
+sample_f2 <- function(n) {
+  rexp(n, rate = 1) + 1
+}
+samples_f2 <- sample_f2(n)
+weights_f2 <- g(samples_f2) / f2(samples_f2)
+est_f2 <- mean(weights_f2)
+variance_f2 <- var(weights_f2) / n
+
+data3 <- data.frame(t(c(variance_f1,variance_f2)))
+colnames(data3) <- c( "使用f1(x)的方差","使用f2(x)的方差")
+knitr::kable(data3)
+```
+
+由表可得f2的方差更小。
+
+## Question4
+
+Monte Carlo experiment:'
+
+* For $n = 10^4, 2 × 10^4, 4 × 10^4, 6 × 10^4, 8 × 10^4$, apply the fast sorting algorithm (R function sort) to randomly permuted numbers of 1, . . . , n. 
+
+* Use R function rbenchmark::benchmark to count computation time (with 1000 replications), denoted by $a_n$.
+
+* I Regress an on $t_n := nlog(n)$, and graphically show the results (scatter plot and regression line).
+
+
+## Answer4
+
+### 4.1 记录时间
+
+首先对不同n值的乱序数字进行快排，benchmark记录时间,结果如下表所示:
+
+```{r,echo=FALSE}
+library(rbenchmark)
+
+n <- c(1e4, 2*1e4, 4 * 1e4, 6 * 1e4, 8 * 1e4)
+
+fast_sort <- function(n){
+  sp = sample(1:n)  
+  sort(sp)
+}
+
+result <- benchmark(
+  "a_1"={
+    re <- fast_sort(n[1])
+  },
+  "a_2"={
+    re <- fast_sort(n[2])
+  },
+  "a_3"={
+    re <- fast_sort(n[3])
+  },
+  "a_4"={
+    re <- fast_sort(n[4])
+  },
+  "a_5"={
+    re <- fast_sort(n[5])
+  },
+  replications = 1000,
+  columns = c("test", "replications", "elapsed"))
+
+knitr::kable(data.frame(result))
+
+```
+
+### 4.2 对时间进行回归分析
+
+对不同n值的benchmark时间进行线性回归，如下图:
+
+```{r,echo=FALSE}
+
+data <- data.frame(
+  n = n,
+  t_n = n * log(n),
+  a_n = result$elapsed
+)
+
+fit <- lm(a_n ~ t_n, data = data)
+
+plot(data$t_n,data$a_n,type="p",main="线性拟合回归",
+     xlab="t", ylab="n*log(n)")
+abline(fit, col = "red", lwd = 2)
+```
