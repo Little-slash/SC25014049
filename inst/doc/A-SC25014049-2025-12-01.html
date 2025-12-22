@@ -358,9 +358,9 @@ f(x) = \frac{x}{\sigma^2}e^{-x^2/(2\sigma^2)},\qquad x\ge0,\sigma&gt;0
 </div>
 <div id="利用microbenchmark函数分析两种方法的时间" class="section level3">
 <h3>2.2 利用microbenchmark函数分析两种方法的时间</h3>
-<pre><code>##          expr    min      lq     mean  median     uq    max neval cld
-## 1    逆变换法 0.5947 0.60875 0.668505 0.62840 0.6576 4.0029   100  a 
-## 2 BoxMuller法 0.9463 1.00400 1.060647 1.06425 1.1098 1.2271   100   b</code></pre>
+<pre><code>##          expr    min      lq     mean  median      uq    max neval cld
+## 1    逆变换法 0.5625 0.62415 0.658071 0.63485 0.64475 2.7941   100  a 
+## 2 BoxMuller法 0.9025 1.02475 1.066943 1.08685 1.10980 1.1820   100   b</code></pre>
 <p>由时间结果可看出逆变换法显著快于BOX-MULLER法，逆变换法的优势在于计算简单直接，仅需生成均匀随机数并进行对数与平方根运算Box-Muller法的相对较慢主要是由于需要额外的三角函数计算，所以应该优先使用逆变换法进行随机数生成。</p>
 </div>
 </div>
