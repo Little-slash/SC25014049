@@ -369,12 +369,27 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 与DSC数据处理类似，输入已经测试的TGA的实验数据，通常有两列组成，一个是温度，一个是质量百分比。温度单位为摄氏度，质量百分比为相对于初始质量的百分比。同样确保这两个向量的长度是一样的，否则函数会报错。可以用read.csv或者read.table从文件进行读取。
 TGA分析为tga_analyze函数。它有主要的三个参数：temperature、mass和n_components。前两个就是准备好的数据向量，第三个是设置期望的分解组分数量（1-4），如果不指定，它就默认用2个组分进行分解分析。函数跑完以后，会返回一个结果列表，“tga_result”的特殊对象。其中主要包含原始数据、微分热重（DTG）信号、分解组分分析结果（如各组分失重百分比、峰值温度），以及热稳定性参数（如残炭率、T5/T95温度）。可以直接用print函数打印它，就能在控制台看到一个比较详细的摘要，包含热重分析常用的数据。</p>
 <p>举个实际例子。先模拟一点数据。比如我们想模拟一个从30度到800度的升温过程，有200个数据点。质量百分比信号：在约100度、300度和500度附近有三个失重步骤，使用数学函数来模拟。使用代码如下：</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>temp <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">800</span>, <span class="at">length.out =</span> <span class="dv">200</span>) <span class="co"># 从30到800度，200个点</span></span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>mass <span class="ot">&lt;-</span> <span class="dv">100</span> <span class="sc">-</span> <span class="fl">0.1</span><span class="sc">*</span>(temp<span class="dv">-100</span>)<span class="sc">^</span><span class="fl">0.5</span> <span class="sc">-</span> <span class="fl">0.3</span><span class="sc">*</span>(temp<span class="dv">-300</span>)<span class="sc">^</span><span class="fl">0.7</span> <span class="sc">-</span> <span class="fl">0.4</span><span class="sc">*</span>(temp<span class="dv">-500</span>)<span class="sc">^</span><span class="fl">0.8</span></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>rel <span class="ot">&lt;-</span> <span class="fu">tga_analyze</span>(<span class="at">temperature =</span> temp, <span class="at">mass =</span> mass, <span class="at">n_components =</span> <span class="dv">3</span>)</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">print</span>(rel) </span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(SC25014049)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>temp <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">800</span>, <span class="at">length.out =</span> <span class="dv">200</span>) <span class="co"># 从30到800度，200个点</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>mass <span class="ot">&lt;-</span> <span class="dv">100</span> <span class="sc">-</span> <span class="fl">0.1</span><span class="sc">*</span>(temp<span class="dv">-100</span>)<span class="sc">^</span><span class="fl">0.5</span> <span class="sc">-</span> <span class="fl">0.3</span><span class="sc">*</span>(temp<span class="dv">-300</span>)<span class="sc">^</span><span class="fl">0.7</span> <span class="sc">-</span> <span class="fl">0.4</span><span class="sc">*</span>(temp<span class="dv">-500</span>)<span class="sc">^</span><span class="fl">0.8</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>rel <span class="ot">&lt;-</span> <span class="fu">tga_analyze</span>(<span class="at">temperature =</span> temp, <span class="at">mass =</span> mass, <span class="at">n_components =</span> <span class="dv">3</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="fu">print</span>(rel) </span></code></pre></div>
+<pre><code>## TGA analysis
+## ===========
+## data point: 200
+## detected component: 3
+## 
+## Thermal stability parameter:
+## carbon yield: 35.8 %
+## T5%: 800.0 degree
+## T95%: 800.0 degree
+## 
+## Component decomposition:
+## component1: NaN %weight loss, peak-temp: 509.8 degree
+## component2: 6.8 %weight loss, peak-temp: 564.0 degree
+## component3: 29.5 %weight loss, peak-temp: 602.7 degree</code></pre>
 </div>
 
 

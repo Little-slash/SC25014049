@@ -10,16 +10,16 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// tga_decompose_cpp
-List tga_decompose_cpp(NumericVector temp, NumericVector mass, int n_components);
-RcppExport SEXP _SC25014049_tga_decompose_cpp(SEXP tempSEXP, SEXP massSEXP, SEXP n_componentsSEXP) {
+// find_local_minima
+std::vector<int> find_local_minima(NumericVector x, int window, double threshold);
+RcppExport SEXP _SC25014049_find_local_minima(SEXP xSEXP, SEXP windowSEXP, SEXP thresholdSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type temp(tempSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type mass(massSEXP);
-    Rcpp::traits::input_parameter< int >::type n_components(n_componentsSEXP);
-    rcpp_result_gen = Rcpp::wrap(tga_decompose_cpp(temp, mass, n_components));
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< int >::type window(windowSEXP);
+    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
+    rcpp_result_gen = Rcpp::wrap(find_local_minima(x, window, threshold));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -36,10 +36,39 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// trapezoidal_integral
+double trapezoidal_integral(NumericVector x, NumericVector y, int start, int end);
+RcppExport SEXP _SC25014049_trapezoidal_integral(SEXP xSEXP, SEXP ySEXP, SEXP startSEXP, SEXP endSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< int >::type start(startSEXP);
+    Rcpp::traits::input_parameter< int >::type end(endSEXP);
+    rcpp_result_gen = Rcpp::wrap(trapezoidal_integral(x, y, start, end));
+    return rcpp_result_gen;
+END_RCPP
+}
+// tga_decompose_cpp
+List tga_decompose_cpp(NumericVector temp, NumericVector mass, int n_components);
+RcppExport SEXP _SC25014049_tga_decompose_cpp(SEXP tempSEXP, SEXP massSEXP, SEXP n_componentsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type temp(tempSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type mass(massSEXP);
+    Rcpp::traits::input_parameter< int >::type n_components(n_componentsSEXP);
+    rcpp_result_gen = Rcpp::wrap(tga_decompose_cpp(temp, mass, n_components));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_SC25014049_tga_decompose_cpp", (DL_FUNC) &_SC25014049_tga_decompose_cpp, 3},
+    {"_SC25014049_find_local_minima", (DL_FUNC) &_SC25014049_find_local_minima, 3},
     {"_SC25014049_baseline_correct_cpp", (DL_FUNC) &_SC25014049_baseline_correct_cpp, 3},
+    {"_SC25014049_trapezoidal_integral", (DL_FUNC) &_SC25014049_trapezoidal_integral, 4},
+    {"_SC25014049_tga_decompose_cpp", (DL_FUNC) &_SC25014049_tga_decompose_cpp, 3},
     {NULL, NULL, 0}
 };
 
