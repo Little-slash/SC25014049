@@ -19,17 +19,11 @@ Maintainer: Fenghao Lu <lfh3485188464@163.com>
 \keyword{ package }
 \examples{
   \dontrun{
-     temp <- seq(30, 800, length.out = 100)
-     mass <- 100 - 15*exp(-((temp-200)/50)^2) - 35*exp(-((temp-350)/60)^2)
-     result <- tga_analyze(temp, mass, n_components = 2)
-     print(result)
-     plot(result)
-     
-     # Simple DSC analysis
-     temp <- seq(0, 300, length.out = 100)
-     heat <- 10 + 5*sin(temp/50) - 8*dnorm(temp, 150, 20)
-     result <- dsc_analyze(temp, heat)
-     print(result)
-     plot(result)
+     res <- simulate_hirsch_fye(eps_d = 0.0, eps_k = c(-1,1), V_k = c(0.5,0.5), U = 2.0,
+     beta = 5.0, L = 40, n_steps = 5000, thermal = 500, measure_interval = 5,
+     seed = 123)
+     mean(res$measurements$n_up)
+     mean(res$measurements$n_dn)
+     plot(res$measurements$n_up, type = 'l', main = 'n_up samples')
   }
 }
